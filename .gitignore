@@ -53,3 +53,5 @@ results/
 # OS
 .DS_Store
 Thumbs.db
+
+test_gemini_key.py

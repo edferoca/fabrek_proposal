@@ -1,266 +1,64 @@
-# AI Assistance & LLM Interaction Log
+# Use and Implementation of AI Assistants & LLM Tools
 
-This document records the key prompts and reasoning process used throughout the development of the JSSP Solver, as requested in the assessment brief.
+This project was carried out largely with the help of AI assistants. In light of this, the following outlines the different decisions and reasoning that led to the implementation of each prompt and request used to build this project.
 
-## Purpose
+## Motivation 1: Structuring
 
-Rather than list every single interaction, this log captures the **major decisions, prompts, and learnings** that shaped the solution. This demonstrates:
-- Structured use of AI assistance
-- Verification and critical evaluation of AI outputs
-- Understanding of the underlying problem
-- Rationale for design choices
+### Context:
+- Lack of understanding regarding the proper interpretation of certain contexts, such as JSSP problems in their practical deployment
+- Limited time to refine existing knowledge and apply it to the problem
 
----
+### Prompts Used
 
-## Session 1: Project Initialization & Architecture
+- "Explain how JSSP problems work, what methods are typically used to solve them, and where ML or LLM models fit in"
 
-### Prompt 1.1: "Design a Python project structure for JSSP with multiple solver approaches"
+### Tools Used
+- ChatGPT Pro
 
-**Context:** Starting the project, needed clear modular architecture.
+### Decisions Made
+- A contextual framework was created to better understand and build a mental model of the requirements involved in deploying solutions for these types of problems
+- A basic project structure was designed as a mental map:
 
-**AI Response:** Suggested organizing into `data/`, `baselines/`, `ml_approaches/`, `utils/` modules with separate files per algorithm.
 
-**Decision:** ✓ Adopted. This enables:
-- Independent testing of each approach
-- Easy addition of new solvers
-- Clear separation of concerns
+project/
+│
+├── results/
+│
+├── src/
+│ ├── data/ → Definition of the JSSP problem (e.g., 6×6)
+│ ├── baselines/ → Classical methods
+│ ├── ml-LLM_impl/ → AI-based methods
+│ ├── comparation/ → Method comparison
+│ ├── visualization/ → Functions for Gantt chart visualization
+│ ├── main.py → Run the full pipeline
 
-**Learning:** Modular design makes it easier to implement, test, and compare approaches. AI correctly identified this as a priority.
-
----
-
-## Session 2: Core Data Structures
-
-### Prompt 2.1: "Create a dataclass for representing JSSP instances and solutions"
-
-**Context:** Need immutable, type-safe representation of jobs, machines, and schedules.
-
-**AI Response:** Provided `JSSPInstance` and `JSSPSchedule` dataclasses with validation.
-
-**Decision:** ✓ Adopted with modifications. Added custom validation logic and `to_dict()` method for serialization.
-
-**Learning:** AI generated good boilerplate but missed domain-specific validation (e.g., ensuring machines are valid indices). Added these manually.
 
 ---
 
-## Session 3: Baseline Solvers
-
-### Prompt 3.1: "Implement SPT and LPT dispatching rules for JSSP"
-
-**Context:** Need fast, interpretable baselines for comparison.
-
-**AI Response:** Provided greedy scheduling loop with rule-specific selection.
-
-**Decision:** ✓ Adopted but verified correctness by hand-tracing a small instance.
-
-**Learning:** AI output was correct but lacked clarity in the selection logic. Refactored to make the dispatching rule abstract and split SPT/LPT into subclasses.
-
-**Verification:** Tested with a 2×2 toy instance:
-```
-Jobs: [[M0:5, M1:3], [M0:4, M1:6]]
-SPT Makespan: 11 ✓
-LPT Makespan: 10 ✓
-```
-
-### Prompt 3.2: "Implement a Genetic Algorithm for JSSP"
-
-**Context:** Metaheuristic to escape local optima.
-
-**AI Response:** Provided population initialization, tournament selection, order crossover (OX), swap mutation.
-
-**Decision:** ✓ Adopted. Reviewed against standard GA literature.
-
-**Learning:** AI chose order crossover (OX) which is standard for permutation problems—good choice. Verified mutation operator maintains feasible permutations.
-
----
-
-## Session 4: OR-Tools Integration
-
-### Prompt 4.1: "Wrap Google OR-Tools CP-SAT for JSSP"
-
-**Context:** Need industrial-strength solver for comparison.
-
-**AI Response:** Provided constraint model with decision variables, intervals, and objective.
-
-**Decision:** ✓ Adopted but caught a critical error during testing.
-
-**Error Found:** Initial version didn't enforce precedence constraints properly.
-
-**Correction:** Manually added:
-```python
-for job_id in range(instance.num_jobs):
-    for op_idx in range(len(instance.jobs[job_id]) - 1):
-        model.Add(start_next >= end_curr)  # Explicit precedence
-```
-
-**Learning:** AI can generate CP models but needs careful review. Always test with small instances and verify constraints are enforced.
-
----
-
-## Session 5: Visualization & Evaluation
-
-### Prompt 5.1: "Create a Gantt chart visualization for JSSP schedules"
-
-**Context:** Need to visualize solutions for interpretability.
-
-**AI Response:** Provided matplotlib-based horizontal bar chart with color-coded jobs.
-
-**Decision:** ✓ Adopted. Added machine labels, time grid, legend.
-
-**Learning:** AI generated clean code but initial version had poor label clarity. Improved by:
-- Adding operation labels (e.g., "J0-O1")
-- Clearer machine axis
-- Larger figsize
-
----
-
-## Session 6: LLM-Augmented Approach
-
-### Prompt 6.1: "Design an LLM-based scheduler with fallback logic"
-
-**Context:** Requirement for "LLM or AI-assisted approach" in the brief.
-
-**Initial Idea:** Call GPT-4 to generate schedules directly.
-
-**Challenges Identified:**
-- Not all LLMs understand JSSP constraints natively
-- API cost considerations
-- Need fallback for robustness
-
-**AI Response:** Suggested wrapper class with:
-- JSON formatting of instances
-- Structured prompt template
-- Fallback to LPT heuristic
-
-**Decision:** ✓ Partially adopted but kept fallback-first for this submission (no API key configured).
-
-**Rationale:** 
-- Demonstrates the *architecture* without external dependencies
-- Fallback ensures reproducibility in evaluation
-- Shows understanding of production constraints
-
-**Future Work:** With API key + budget, would implement actual LLM calls and compare results.
-
----
-
-## Session 7: Main Pipeline & Testing
-
-### Prompt 7.1: "Create a main.py that runs all solvers and compares results"
-
-**Context:** Need executable entry point showing all approaches.
-
-**AI Response:** Provided framework iterating over solvers, timing each, formatting comparison table.
-
-**Decision:** ✓ Adopted. Added error handling and result aggregation.
-
-**Learning:** AI structured this well; minimal changes needed. Good example of where AI shines (boilerplate + orchestration).
-
----
-
-## Session 8: Documentation
-
-### Prompt 8.1: "Write a comprehensive README covering problem, approaches, and reproducibility"
-
-**Context:** Assessment requires clear explanation of all decisions.
-
-**AI Response:** Provided structure with sections for problem, approaches, setup, results.
-
-**Decision:** ✓ Adopted with heavy customization.
-- Expanded rationale for 6×6 instance size
-- Added trade-off table for design decisions
-- Included specific algorithm pseudocode
-- Added production integration notes
-
-**Learning:** AI can generate documentation templates but doesn't capture domain-specific nuances. Strategic sections (rationale, trade-offs, production) required human input.
-
----
-
-## Session 9: Error Handling & Edge Cases
-
-### Issues Found & Resolved
-
-1. **GA Divergence:** Initial GA sometimes produced non-feasible sequences.
-   - **Fix:** Added sequence validation in crossover/mutation.
-   - **AI Assistance:** Helped debug by suggesting print statements to trace parent/child sequences.
-
-2. **CP-SAT Infeasibility:** Solver sometimes reported UNKNOWN status.
-   - **Fix:** Increased time limit from 5s to 10s, added status checking.
-   - **AI Assistance:** Suggested checking `solver.parameters` documentation.
-
-3. **Instance Validation:** Random generation could create degenerate instances.
-   - **Fix:** Added preprocessing to ensure each job has ≥1 operation, each operation has valid machine/time.
-   - **AI Assistance:** Prompted to "add validation to generator"; AI suggested comprehensive checks.
-
----
-
-## Session 10: Code Review & Optimization
-
-### Performance Observations
-
-| Approach | 6×6 Time | Makespan |
-|----------|----------|----------|
-| SPT      | 0.1 ms   | 156      |
-| LPT      | 0.2 ms   | 148      |
-| GA (50 gen) | 120 ms | 142     |
-| CP-SAT (10s) | 1200 ms | 138   |
-| LLM      | 0.1 ms   | 148      |
-
-**Learning:** Confirmed expected trade-off between speed and optimality.
-
----
-
-## What Worked Well
-
-✓ **Using AI for boilerplate:** Dataclasses, visualization, config setup  
-✓ **AI-assisted debugging:** Tracing complex GA logic, CP-SAT parameters  
-✓ **Documentation structure:** Provided good starting templates  
-✓ **Error messages:** AI suggested clear, informative error text  
-
-## What Required Human Oversight
-
-✗ **Algorithm correctness:** GA mutation, CP-SAT constraints—all needed manual verification  
-✗ **Problem-specific design:** 6×6 sizing, approach selection, rationale  
-✗ **Trade-off analysis:** Why GA + CP-SAT but not other metaheuristics?  
-✗ **Production considerations:** API design, caching, fallback strategies  
-
-## Key Learnings for Future Work
-
-1. **Trust but verify:** AI generates plausible code that *looks* right; test everything
-2. **Use AI for velocity:** Boilerplate, structure, scaffolding—where humans are slow
-3. **Reserve human judgment for:** Algorithm design, problem modeling, trade-offs
-4. **Iterative refinement:** First pass is rarely optimal; use AI prompts to iterate (e.g., "refactor for clarity")
-5. **Document reasoning:** This log itself is valuable—shows how decisions were made
-
----
-
-## Prompts by Category
-
-### Best For AI
-- Scaffolding & project structure
-- Visualization & plotting
-- Config, logging, CLI parsing
-- Error handling boilerplate
-- Documentation templates
-
-### Risky For AI
-- Algorithm implementation (always verify with small test cases)
-- Mathematical correctness (review literature)
-- Constraint modeling (test feasibility)
-- Production integration (think through edge cases)
-
----
-
-## Final Reflection
-
-This solution demonstrates a **pragmatic, literate hybrid approach**:
-- AI accelerated development speed (~3-4x faster than from scratch)
-- Human expertise ensured correctness, design quality, and problem understanding
-- Clear documentation of the process (this log) shows judgment and reasoning
-
-The assessment explicitly welcomed AI use while valuing "your judgment in directing it, your ability to verify its output, and your understanding of the underlying problem." This log aims to demonstrate all three.
-
----
-
-**Generated:** 2024-04-28  
-**AI Models Consulted:** GPT-4, Claude, GitHub Copilot  
-**Verification Status:** All major components tested and validated ✓
+## Motivation 2: Implementation
+
+### Context:
+- Motivation to use new AI assistant tools such as VS Code Copilot
+- Limited time to refine existing knowledge and apply it to the problem
+
+### Prompts Used
+
+- "Structure a project based on this statement: Job Shop Scheduling. Estimated effort: given a set of jobs, each consisting of ordered operations that must be processed on specific machines, find a schedule that minimises makespan (total completion time). Build a pipeline that takes a JSSP instance (jobs × machines × processing times) and produces a feasible, high-quality schedule. Generate random instances programmatically — start small (e.g., 6 jobs × 6 machines) and create a way to scale up to show how your approach behaves. Assume the following requirements:
+
+- Python 3.10+. Any libraries are acceptable (Google OR-Tools, PyTorch, scikit-learn, custom code — your choice).
+- At least one classical/heuristic baseline (e.g., dispatching rule like SPT/LPT, genetic algorithm, or constraint programming via Google OR-Tools CP-SAT solver).
+- At least one ML or LLM-augmented approach (choose one or combine).
+- Provide a comparison: makespan, feasibility rate, computation time. Show where each approach succeeds and fails.
+- Visualization of at least one schedule (Gantt chart or equivalent)."
+
+### Tools Used
+- VS Code Copilot (Claude Haiku 4.5)
+
+### Decisions Made
+- The assistant structured the entire project, including modified folders and ready-to-run files
+- A first visual inspection of all generated components was performed, followed by:
+  - Creation of the virtual environment and installation of dependencies
+  - Execution of `python main.py`
+- Execution errors and unused functions were identified:
+  - Some were fixed manually by following terminal outputs
+  - Others were passed back to the assistant for correction
