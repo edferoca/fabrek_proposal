@@ -35,8 +35,7 @@ The default instance uses:
 ### 1. Setup
 
 ```bash
-# Navigate to project directory
-cd fabrek_proposal
+
 
 # Create virtual environment
 python -m venv .venv

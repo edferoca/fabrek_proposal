@@ -40,7 +40,7 @@ wheels/
 *.egg
 
 # Results and outputs
-results/
+#results/
 *.png
 *.jpg
 *.csv
