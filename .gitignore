@@ -41,7 +41,7 @@ wheels/
 
 # Results and outputs
 #results/
-*.png
+#*.png
 *.jpg
 *.csv
 *.log
