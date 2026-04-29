@@ -37,11 +37,8 @@ class CPSATSolver:
         # Precedence constraints
         for job_id in range(instance.num_jobs):
             for op_idx in range(len(instance.jobs[job_id]) - 1):
-                start_curr, _, _, _ = task_vars[(job_id, op_idx)]
-                end_curr, _, _, proc_time_curr = task_vars[(job_id, op_idx)]
-                
-                model.Add(end_curr - start_curr == proc_time_curr)
-                
+                # task_vars stores (start_var, end_var, interval_var, proc_time)
+                _, end_curr, _, _ = task_vars[(job_id, op_idx)]
                 start_next, _, _, _ = task_vars[(job_id, op_idx + 1)]
                 model.Add(start_next >= end_curr)
         

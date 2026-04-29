@@ -1,6 +1,7 @@
 # Virtual Environments
 .venv/
 .venvfabrek/
+.env 
 env/
 venv/
 ENV/

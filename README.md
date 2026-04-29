@@ -38,8 +38,13 @@ The default instance uses:
 # Navigate to project directory
 cd fabrek_proposal
 
-# Activate virtual environment (Windows)
-.venvfabrek\Scripts\Activate.ps1
+# Create virtual environment
+python -m venv .venv
+
+# Activate — Linux/macOS:
+source .venv/bin/activate
+# Activate — Windows (PowerShell):
+# .venv\Scripts\Activate.ps1
 
 # Install dependencies
 pip install -r requirements.txt
@@ -179,15 +184,14 @@ LLM                 148         0.0002      Yes
 
 ## How to Reproduce Results
 
-On a Windows laptop with Python 3.10+:
-
 ```bash
-# 1. Clone/navigate to project
+# 1. Navigate to project
 cd fabrek_proposal
 
-# 2. Create and activate venv (if not already done)
+# 2. Create and activate venv
 python -m venv .venv
-.venv\Scripts\Activate.ps1
+source .venv/bin/activate        # Linux/macOS
+# .venv\Scripts\Activate.ps1    # Windows
 
 # 3. Install dependencies
 pip install -r requirements.txt
@@ -197,8 +201,6 @@ python main.py
 
 # 5. View results in results/ directory
 ```
-
-**Total time:** ~5 minutes setup, ~30 seconds execution
 
 ## Integration as Production Microservice
 

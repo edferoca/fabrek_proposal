@@ -1,4 +1,6 @@
 """Visualization utilities for JSSP solutions."""
+import matplotlib
+matplotlib.use("Agg")  # Non-interactive backend — safe in all environments
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 from typing import Dict, Tuple, List
@@ -84,8 +86,10 @@ def visualize_gantt_chart(
     if output_file:
         plt.savefig(output_file, dpi=300, bbox_inches='tight')
         print(f"Gantt chart saved to {output_file}")
-    
-    plt.show()
+    else:
+        plt.show()
+
+    plt.close(fig)
 
 
 def plot_comparison(
@@ -134,5 +138,7 @@ def plot_comparison(
     if output_file:
         plt.savefig(output_file, dpi=300, bbox_inches='tight')
         print(f"Comparison chart saved to {output_file}")
-    
-    plt.show()
+    else:
+        plt.show()
+
+    plt.close(fig)

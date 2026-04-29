@@ -4,14 +4,18 @@ Demonstrates all approaches on a sample instance.
 """
 
 import time
+from dotenv import load_dotenv
 from src.data import generate_random_jssp, JSSPInstance
 from src.baselines import SPTDispatcher, LPTDispatcher, GeneticAlgorithmSolver, CPSATSolver
-from src.ml_approaches import LLMScheduler
+from src.ml_approaches import LLMScheduler, MLScheduler
 from src.utils import evaluate_schedule, visualize_gantt_chart, plot_comparison
 
 
 def main():
     """Run all solvers and compare results."""
+    
+    # ✅ CARGAR VARIABLES DEL .env
+    load_dotenv()
     
     print("=" * 80)
     print("JSSP Solver - Comprehensive Benchmark")
@@ -65,20 +69,28 @@ def main():
     print(f"    Makespan: {schedules['CP-SAT'].makespan}, Time: {computation_times['CP-SAT']:.4f}s")
     
     # ML/LLM Approach: LLM Scheduler
-    print("\n[6] Running LLM-augmented Scheduler...")
+    print("\n[6] Running LLM-augmented Scheduler (Gemini)...")
     llm_solver = LLMScheduler()
     start_t = time.time()
-    schedules["LLM"] = llm_solver.solve(instance)
-    computation_times["LLM"] = time.time() - start_t
-    print(f"    Makespan: {schedules['LLM'].makespan}, Time: {computation_times['LLM']:.4f}s")
+    schedules["LLM (Gemini)"] = llm_solver.solve(instance)
+    computation_times["LLM (Gemini)"] = time.time() - start_t
+    print(f"    Makespan: {schedules['LLM (Gemini)'].makespan}, Time: {computation_times['LLM (Gemini)']:.4f}s")
+    
+    # ML Approach: ML Scheduler (scikit-learn)
+    print("\n[7] Running ML Scheduler (scikit-learn features)...")
+    ml_solver = MLScheduler(strategy="ensemble")
+    start_t = time.time()
+    schedules["ML (Feature-based)"] = ml_solver.solve(instance)
+    computation_times["ML (Feature-based)"] = time.time() - start_t
+    print(f"    Makespan: {schedules['ML (Feature-based)'].makespan}, Time: {computation_times['ML (Feature-based)']:.4f}s")
     
     # Print comparison
     print("\n" + "=" * 80)
     print("RESULTS SUMMARY")
     print("=" * 80)
     
-    print(f"\n{'Method':<15} {'Makespan':<12} {'Time (s)':<12} {'Feasible':<10}")
-    print("-" * 50)
+    print(f"\n{'Method':<20} {'Makespan':<12} {'Time (s)':<12} {'Feasible':<10}")
+    print("-" * 55)
     
     best_makespan = float('inf')
     for method, schedule in schedules.items():
@@ -86,7 +98,7 @@ def main():
         makespan = schedule.makespan
         feasible = "Yes" if schedule.feasible else "No"
         
-        print(f"{method:<15} {makespan:<12} {comp_time:<12.4f} {feasible:<10}")
+        print(f"{method:<20} {makespan:<12} {comp_time:<12.4f} {feasible:<10}")
         
         if schedule.feasible:
             best_makespan = min(best_makespan, makespan)
@@ -111,6 +123,23 @@ def main():
             title=f"Best Schedule ({best_method}): Makespan = {best_schedule.makespan}",
             output_file="results/best_schedule.png"
         )
+
+        # Comparison chart across all methods
+        print(f"\nGenerating comparison chart...")
+        from src.utils import evaluate_schedule
+        from src.utils.evaluation import calculate_metrics
+        metrics = calculate_metrics(instance, schedules, computation_times)
+        plot_comparison(
+            metrics,
+            metric="makespan",
+            output_file="results/comparison_makespan.png"
+        )
+        plot_comparison(
+            metrics,
+            metric="computation_time",
+            output_file="results/comparison_time.png"
+        )
+        print("Comparison charts saved to results/")
     
     print("\n" + "=" * 80)
     print("✓ Benchmark complete! Check 'results/' directory for outputs.")
